@@ -1,0 +1,17 @@
+{
+  "name": "rewards-validation",
+  "version": "1.0.0",
+  "description": "validate the reward values vs. the contract",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Orbs Ltd",
+  "license": "MIT",
+  "dependencies": {
+    "csv-parse": "^4.8.2",
+    "csv-parser": "^2.3.2",
+    "minimist": "^1.2.0",
+    "orbs-pos-data": "^4.0.0"
+  }
+}
