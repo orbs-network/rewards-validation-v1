@@ -18,10 +18,20 @@ const DISTRIBUTION_2_NAME = "Elections28-55";
 
 async function compareAddress(row, orbsPos) {
 	// we have two previous distributions
-	let total = await orbsPos.getRewards(row.address)
-	let rawTotal = total.delegatorReward + total.guardianReward + total.validatorReward;
-	let pending = rawTotal - row.firstDist - row.secondDist;
-	let diffCalc = row.pending - pending; 
+	let total = 0;
+	try {
+		total = await orbsPos.getRewards(row.address)
+	} catch (e) {
+		console.log(e)
+
+		return {
+			address: row.address,
+			diff: -888
+		}
+	}
+	let rawTotal = total.delegatorReward + total.guardianReward + total.validatorReward; //pos data
+	let pending = rawTotal - row.firstDist - row.secondDist - row.thirdDist; // pending in pos (to be distributed)
+	let diffCalc = row.pending - pending; // diff -> pending in database - pending in pos
 	if (argv.forDist) {
 		diffCalc = pending;
 	}
@@ -35,13 +45,13 @@ async function iterateFile(filename, orbsPos) {
 	// return new Promise((resolve,reject) => {
 		let results = [];
 		let queue = [];
-		let parallelism = 20;
+		let parallelism = 5;
 
 		let file = fs.readFileSync(filename);
 		let records = csv(file);
 
 		for (let i = 1; i < records.length; i++) {
-			if (queue.length == 10) {
+			if (queue.length == parallelism) {
 				await Promise.all(queue).then((arr) => {
 					for (r of arr) {
 						console.log(r);
@@ -56,7 +66,8 @@ async function iterateFile(filename, orbsPos) {
 				address: records[i][0],
 				firstDist: records[i][1],
 				secondDist: records[i][2],
-				pending: records[i][3] 
+				thirdDist: records[i][3],
+				pending: records[i][4] 
 			}
 			let p = compareAddress(data, orbsPos);
 			
